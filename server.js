@@ -40,6 +40,7 @@ const __filename = url.fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 // media types https://www.iana.org/assignments/media-types/media-types.xhtml
+// default mediatypes
 const mediatypes = {
   '.html': 'text/html',
   '.js': 'text/javascript',
@@ -85,7 +86,11 @@ http2.createSecureServer({key: fs.readFileSync('private.key'), cert: fs.readFile
   if (request.method === 'POST' && request.headers['content-type'] === 'application/x-www-form-urlencoded') {
     let body = Buffer.alloc(0)
     request
-      .on('error', error => console.error(error))
+      .on('error', error => {
+        response
+          .writeHead(422, {"Content-type": "text/html"})
+          .end(`<h2>${error.stack}</h2>`)
+      })
       .on('data', chunk => {
         body = Buffer.concat([body, chunk])
         // maximum form size 1MB
@@ -99,7 +104,7 @@ http2.createSecureServer({key: fs.readFileSync('private.key'), cert: fs.readFile
         if (request.connection.destroyed === true) {
           response
             .writeHead(413, {"Content-type": "text/html"})
-            .end(`<h1>entry data is too large</h1>`)
+            .end(`<h2>entry data is too large</h2>`)
           return
         }
         body = url.parse(`?${body.toString()}`, true).query
@@ -124,16 +129,16 @@ http2.createSecureServer({key: fs.readFileSync('private.key'), cert: fs.readFile
   // ${data}\r\n
   // --${boundary}--
   else if (request.method === 'POST' && request.headers['content-type'].match(/^.*?(?=; )/g)[0] === 'multipart/form-data') {
-    let raw_boundary = request.headers['content-type'].match(/(?<=boundary=).*?$/g)[0]
-    let first_boundary = Buffer.from(`--${raw_boundary}\r\n`)
-    // let middle_boundary = Buffer.from(`\r\n${raw_boundary}--\r\n`)
-    let last_boundary = Buffer.from(`\r\n--${raw_boundary}--`)
+    let boundary = request.headers['content-type'].match(/(?<=boundary=).*?$/g)[0]
+    let first_boundary = Buffer.from(`--${boundary}\r\n`)
+    // let middle_boundary = Buffer.from(`\r\n--${raw_boundary}\r\n`)
+    let last_boundary = Buffer.from(`\r\n--${boundary}--`)
     let multipart = Buffer.alloc(0)
     request
       .on('error', error => {
         response
           .writeHead(422, {"Content-type": "text/html"})
-          .end(`<h1>${error.message}</h1>`)
+          .end(`<h2>${error.stack}</h2>`)
       })
       .on('data', chunk => {
         multipart = Buffer.concat([multipart, chunk])
@@ -147,19 +152,30 @@ http2.createSecureServer({key: fs.readFileSync('private.key'), cert: fs.readFile
         if (request.connection.destroyed === true) {
           response
             .writeHead(413, {"Content-type": "text/html"})
-            .end(`<h1>entry data is too large</h1>`)
+            .end(`<h2>entry data is too large</h2>`)
           return
         }
+        // multipart parse START
         let header_start = multipart.indexOf(first_boundary) + first_boundary.length
         let header_end = multipart.indexOf('\r\n\r\n')
         let header = multipart.slice(header_start, header_end).toString()
-
+        
+        let field_name = header.match(/(?<name=").*?(?=")/g)[0]
+        let file_name = header.match(/(?<filename=").*?(?=")/g)[0]
+        
         let start_data = header_end + header_end.length
         let end_data = multipart.indexOf(last_boundary)
         let data = multipart.slice(header_end + header_end.length, end_data)
-        let form_parse = multipart
+        
+        let data_of_form = {
+          file: {
+            [field_name]: data
+          }
+        }
+        // multipart parse END
   }
   // multipart HTTP POST END
+
   else {
     let { socket: { alpnProtocol } } = request.httpVersion === '2.0' ? request.stream.session : request
     console.log(JSON.stringify({alpnProtocol, httpVersion: request.httpVersion}))
@@ -172,7 +188,7 @@ http2.createSecureServer({key: fs.readFileSync('private.key'), cert: fs.readFile
     fs.stat(filepath, (error, stats) => {
       if (error || request.url === path.sep) {
         if (error) {
-          if(error.code !== 'ENOENT') {
+          if (error.code !== 'ENOENT') {
             response
               .writeHead(500, {'content-type': 'text/html'})
               .end(`<p>Sorry, check with the site admin for error: <br><b>${error.code}<b></p>`)
@@ -189,6 +205,8 @@ http2.createSecureServer({key: fs.readFileSync('private.key'), cert: fs.readFile
           content = '<h1>PAGE NOT FOUND!</h1><p>HTTP 404</p>',
           author = 'SERVER'
         } = article
+        
+        // view template START
         let template = `<!DOCTYPE html>
         <html lang="en">
         <head>
@@ -266,7 +284,7 @@ http2.createSecureServer({key: fs.readFileSync('private.key'), cert: fs.readFile
                 <button type="submit">Send</button>
               </form>
               <h2><a href="https://${hostname}${name}">${headline}</a></h2>
-              <h5>Title description, Dec 7, 2017</h5>
+              <h5>Title description, Jun 11, 2019</h5>
               <div class="fakeimg">Fake Image</div>
               ${content}
               ${author}
@@ -291,29 +309,41 @@ http2.createSecureServer({key: fs.readFileSync('private.key'), cert: fs.readFile
           .writeHead(`${article === undefined? 404: 200}`, {"content-type": "text/html"})
           .end(template)
       }
+      // view template END
+      
       else {
         if (stats.isFile()) {
+          // serve request file for client START
           fs.readFile(filepath, (error, data) => {
-            if (error) console.log(error)
-            else {
-              let { ext } = path.parse(filepath)
-              let mediatype = mediatypes[ext.toLowerCase()] || 'application/octet-stream'
+            if (error) {
               response
-                .writeHead(200, {'content-type': mimetype})
-                .end(data)
+                .writeHead(500, {'content-type': 'text/html'})
+                .end(`<h2>${error.stack}</h2><p>check with site admin</p>`)
+              return
             }
+            let { ext } = path.parse(filepath)
+            let mediatype = mediatypes[ext.toLowerCase()] || 'application/octet-stream'
+            response
+              .writeHead(200, {'content-type': mimetype})
+              .end(data)
           })
+          // serve request file for client END
         }
         else if (stats.isDirectory()) {
+          // serve request folder for client START
           fs.readdir(filepath, {encoding: 'utf8', withFileTypes: true}, (error, files) => {
-            if (error) {console.error(error)}
-            else {
-              let list = files.map(el => `<li><a href="https://${hostname}${request.url}/${el.name}">${el.name}</a></li>`)
+            if (error) {
               response
-                .writeHead(200, {'content-type': 'text/html'})
-                .end(`<ul>${list.join('')}</ul>`)
+                .writeHead(500, {'content-type': 'text/html'})
+                .end(`<h2>${error.stack}</h2><p>check with site admin</p>`)
+              return
             }
+            let list = files.map(el => `<li><a href="https://${hostname}${request.url}/${el.name}">${el.name}</a></li>`)
+            response
+              .writeHead(200, {'content-type': 'text/html'})
+              .end(`<ul>${list.join('')}</ul>`)
           })
+          // serve request folder for client END
         }
       }
     })
