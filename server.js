@@ -77,7 +77,7 @@ http.createServer((request, response) => {
 // to create key and cert files for self-signed ssl certificate use openssl, or use https://www.ssl.com/online-csr-and-key-generator
 // set "allowHTTP1: true" to support both http 1 and 2 clients
 http2.createSecureServer({key: fs.readFileSync('private.key'), cert: fs.readFileSync('certificate.cert'), allowHTTP1: true}, (request, response) => {
-  console.log(JSON.stringify({method: request.method, url: request.url})))
+  console.log(JSON.stringify({method: request.method, url: request.url}))
 
   // key-value pairs HTTP POST START
   // key-value structure:
@@ -173,9 +173,9 @@ http2.createSecureServer({key: fs.readFileSync('private.key'), cert: fs.readFile
           }
         }
         // multipart parse END
-  }
+  })
   // multipart HTTP POST END
-
+  }
   else {
     let { socket: { alpnProtocol } } = request.httpVersion === '2.0' ? request.stream.session : request
     console.log(JSON.stringify({alpnProtocol, httpVersion: request.httpVersion}))
@@ -225,12 +225,10 @@ http2.createSecureServer({key: fs.readFileSync('private.key'), cert: fs.readFile
           </style>
         </head>
         <body>
-
         <div class="jumbotron text-center" style="margin-bottom:0">
           <h1><a href="https://${hostname}">${siteinfo.title}</a></h1>
           <p>${siteinfo.subtitle}</p> 
         </div>
-
         <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
           <a class="navbar-brand" href="#">Navbar</a>
           <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
@@ -250,7 +248,6 @@ http2.createSecureServer({key: fs.readFileSync('private.key'), cert: fs.readFile
             </ul>
           </div>  
         </nav>
-
         <div class="container" style="margin-top:30px">
           <div class="row">
             <div class="col-sm-4">
@@ -292,7 +289,6 @@ http2.createSecureServer({key: fs.readFileSync('private.key'), cert: fs.readFile
             </div>
           </div>
         </div>
-
         <div class="jumbotron text-center" style="margin-bottom:0">
           <p>Latest Posts</p>
           <p>${database.post == undefined? 'No Post':
@@ -302,7 +298,6 @@ http2.createSecureServer({key: fs.readFileSync('private.key'), cert: fs.readFile
             .join('<br>')}
           </p>
         </div>
-
         </body>
         </html>`
         response
