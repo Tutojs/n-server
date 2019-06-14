@@ -207,98 +207,168 @@ http2.createSecureServer({key: fs.readFileSync('private.key'), cert: fs.readFile
         } = article
         
         // view template START
-        let template = `<!DOCTYPE html>
+        let template = `<!doctype html>
         <html lang="en">
-        <head>
-          <title>${title}</title>
-          <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1">
-          <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-          <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
-          <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-          <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-          <style>
-          .fakeimg {
-            height: 200px;
-            background: #aaa;
-          }
-          </style>
-        </head>
-        <body>
-        <div class="jumbotron text-center" style="margin-bottom:0">
-          <h1><a href="https://${hostname}">${siteinfo.title}</a></h1>
-          <p>${siteinfo.subtitle}</p> 
-        </div>
-        <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
-          <a class="navbar-brand" href="#">Navbar</a>
-          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="collapsibleNavbar">
-            <ul class="navbar-nav">
-              <li class="nav-item">
-                <a class="nav-link" href="https://${hostname}">Home</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="https://${hostname}/about">About</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="https://${hostname}/contact">Contact</a>
-              </li>    
-            </ul>
-          </div>  
-        </nav>
-        <div class="container" style="margin-top:30px">
-          <div class="row">
-            <div class="col-sm-4">
-              <h2>About Me</h2>
-              <h5>Photo of me:</h5>
-              <div class="fakeimg">Fake Image</div>
-              <p>Some text about me in culpa qui officia deserunt mollit anim..</p>
-              <h3>Some Links</h3>
-              <p>Lorem ipsum dolor sit ame.</p>
-              <ul class="nav nav-pills flex-column">
-                <li class="nav-item">
-                  <a class="nav-link active" href="https://${hostname}">Home</a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="https://${hostname}/about">About</a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="https://${hostname}">Link</a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link disabled" href="#">Disabled</a>
-                </li>
-              </ul>
-              <hr class="d-sm-none">
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+            <link
+              rel="stylesheet"
+              href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+              integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+              crossorigin="anonymous">
+            <title>${title}</title>
+          </head>
+          <body>
+            <header class="text-center">
+              <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+                <a class="navbar-brand" href="https://localhost">${siteinfo.title}-${siteinfo.subtitle}</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+                  <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="collapsibleNavbar">
+                  <ul class="navbar-nav">
+                    <li class="nav-item">
+                      <a class="nav-link" href="https://${hostname}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link" href="https://${hostname}/about">About</a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link" href="https://${hostname}/contact">Contact</a>
+                    </li>    
+                  </ul>
+                </div>  
+              </nav>
+            </header>
+            <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
+              <ol class="carousel-indicators">
+                <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
+                <li data-target="#carouselExampleIndicators" data-slide-to="1"></li>
+                <li data-target="#carouselExampleIndicators" data-slide-to="2"></li>
+              </ol>
+              <div class="carousel-inner">
+                <div class="carousel-item active">
+                  <img class="d-block w-100" style="height:400px; background-color: red" src="" alt="First slide">
+                  <div class="carousel-caption d-none d-md-block">
+                    <h5>Article 1</h5>
+                    <p>1-dddd</p>
+                  </div>
+                </div>
+                <div class="carousel-item">
+                  <img class="d-block w-100" style="height:400px; background-color: blue" src="" alt="Second slide">
+                  <div class="carousel-caption d-none d-md-block">
+                    <h5>Article 2</h5>
+                    <p>2-ssss</p>
+                  </div>
+                </div>
+                <div class="carousel-item">
+                  <img class="d-block w-100" style="height:400px; background-color: yellow" src="" alt="Third slide">
+                  <div class="carousel-caption d-none d-md-block">
+                    <h5>Article 3</h5>
+                    <p>3 ttt</p>
+                  </div>
+                </div>
+              </div>
+              <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="sr-only">Previous</span>
+              </a>
+              <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="sr-only">Next</span>
+              </a>
             </div>
-            <div class="col-sm-8">
-              <form action="/" method="POST" enctype="multipart/form-data"><!--enctype="application/x-www-form-urlencoded"-->
-                <input name="name">
-                <input name="age">
-                <input type="file" name="profile" multiple>
-                <button type="submit">Send</button>
-              </form>
-              <h2><a href="https://${hostname}${name}">${headline}</a></h2>
-              <h5>Title description, Jun 11, 2019</h5>
-              <div class="fakeimg">Fake Image</div>
-              ${content}
-              ${author}
-              <br>
+            <div class="container" style="margin-top:30px">
+              <div class="row">
+                <div class="col-sm-4">
+                  <h2>About Me</h2>
+                  <h5>Photo of me:</h5>
+                  <div class="fakeimg">Fake Image</div>
+                  <p>Some text about me in culpa qui officia deserunt mollit anim..</p>
+                  <h3>Some Links</h3>
+                  <p>Lorem ipsum dolor sit ame.</p>
+                  <ul class="nav nav-pills flex-column">
+                    <li class="nav-item">
+                      <a class="nav-link active" href="https://${hostname}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link" href="https://${hostname}/about">About</a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link" href="https://${hostname}">Link</a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link disabled" href="#">Disabled</a>
+                    </li>
+                  </ul>
+                  <hr class="d-sm-none">
+                </div>
+                <div class="col-sm-8">
+                  <form action="/" method="POST" enctype="multipart/form-data"><!--enctype="application/x-www-form-urlencoded"-->
+                    <input name="name">
+                    <input name="age">
+                    <input type="file" name="profile" multiple>
+                    <button type="submit">Send</button>
+                  </form>
+                  <h2><a href="https://${hostname}${name}">${headline}</a></h2>
+                  <h5>Title description, Jun 11, 2019</h5>
+                  <div class="fakeimg">Fake Image</div>
+                  ${content}
+                  ${author}
+                  <br>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-        <div class="jumbotron text-center" style="margin-bottom:0">
-          <p>Latest Posts</p>
-          <p>${database.post == undefined? 'No Post':
-          database.post
-            .slice(0, 5)
-            .map(el => `<a href="https://${hostname}${el.name}">${el.headline}</a>`)
-            .join('<br>')}
-          </p>
-        </div>
-        </body>
+            <footer class="footer-area">
+              <div class="container">
+                <div class="row justify-content-between">
+                  <div class="col-sm-6 col-md-6 col-xl-4">
+                    <h4>About</h4>
+                    <p>But when shot real her. Chamber her one visite removal six
+                        sending himself boys scot exquisite existend an </p>
+                    <p>But when shot real her hamber her</p>
+                  </div>
+                  <div class="col-sm-6 col-md-6 col-xl-4">
+                    <h4>TUTOJS</h4>
+                    <p>"Programming is like a self-service resturant, you can use everything but it's better to cook your meal" Tuto Arya</p>
+                  </div>
+                  <div class="col-sm-12 col-md-8 col-xl-3">
+                    <h4>Latest Posts</h4>
+                    <p>${database.post == undefined? 'No Post':
+                    database.post
+                      .slice(0, 5)
+                      .map(el => `<a href="https://${hostname}${el.name}">${el.headline}</a>`)
+                      .join('<br>')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="container-fluid">
+                <div class="row">
+                  <div class="col-lg-12">
+                    <div class="row">
+                      <div class="col-lg-12">
+                        <p class="text-center">Copyrightless</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </footer>
+            <script
+              src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+              integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+              crossorigin="anonymous"></script>
+            <script
+              src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+              integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+              crossorigin="anonymous"></script>
+            <script
+              src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+              integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+              crossorigin="anonymous"></script>
+          </body>
         </html>`
         response
           .writeHead(`${article === undefined? 404: 200}`, {"content-type": "text/html"})
