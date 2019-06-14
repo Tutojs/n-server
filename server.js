@@ -249,24 +249,24 @@ http2.createSecureServer({key: fs.readFileSync('private.key'), cert: fs.readFile
               </ol>
               <div class="carousel-inner">
                 <div class="carousel-item active">
-                  <img class="d-block w-100" style="height:400px; background-color: red" src="" alt="First slide">
-                  <div class="carousel-caption d-none d-md-block">
+                  <img class="d-block w-100 bg-primary" style="height:400px" src="" alt="First slide">
+                  <div class="carousel-caption d-none d-md-block" style="background-color: rgba(52,58,64,0.25)">
                     <h5>Article 1</h5>
-                    <p>1-dddd</p>
+                    <p>article 1, first caption</p>
                   </div>
                 </div>
                 <div class="carousel-item">
-                  <img class="d-block w-100" style="height:400px; background-color: blue" src="" alt="Second slide">
-                  <div class="carousel-caption d-none d-md-block">
+                  <img class="d-block w-100 bg-danger" style="height:400px" src="" alt="Second slide">
+                  <div class="carousel-caption d-none d-md-block" style="background-color: rgba(52,58,64,0.25)">
                     <h5>Article 2</h5>
-                    <p>2-ssss</p>
+                    <p>article 2, second caption</p>
                   </div>
                 </div>
                 <div class="carousel-item">
-                  <img class="d-block w-100" style="height:400px; background-color: yellow" src="" alt="Third slide">
-                  <div class="carousel-caption d-none d-md-block">
+                  <img class="d-block w-100 bg-warning" style="height:400px" src="" alt="Third slide">
+                  <div class="carousel-caption d-none d-md-block" style="background-color: rgba(52,58,64,0.25)">
                     <h5>Article 3</h5>
-                    <p>3 ttt</p>
+                    <p>article 3, third caption</p>
                   </div>
                 </div>
               </div>
