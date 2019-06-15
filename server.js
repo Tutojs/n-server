@@ -44,8 +44,8 @@ const port = {http: 80, https: 443} // default port of http and https
 const __filename = url.fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-// media types https://www.iana.org/assignments/media-types/media-types.xhtml
-// default mediatypes
+// media types list: https://www.iana.org/assignments/media-types/media-types.xhtml
+// media types
 const mediatypes = {
   '.html': 'text/html',
   '.js': 'text/javascript',
