@@ -1,5 +1,9 @@
 'use strict'
-// to use ECMAscript modules: node --experimental-modules server.js
+// node version: 12.4.0 [latest]
+// to use ECMAscript modules without using .mjs:
+// create package.json [recommended in root] and add this field to top level: "type": "module"
+// package.json {"type" : "module"}
+// node --experimental-modules server.js
 
 // built-in modules START
 import http from 'http'
@@ -10,6 +14,7 @@ import path from 'path'
 // built-in modules END
 
 // json database START
+// example database
 import database from './database.json'
 // {
 // "admin": {}
@@ -133,6 +138,7 @@ http2.createSecureServer({key: fs.readFileSync('private.key'), cert: fs.readFile
     let first_boundary = Buffer.from(`--${boundary}\r\n`)
     // let middle_boundary = Buffer.from(`\r\n--${raw_boundary}\r\n`)
     let last_boundary = Buffer.from(`\r\n--${boundary}--`)
+    let separator = Buffer.from('\r\n\r\n')
     let multipart = Buffer.alloc(0)
     request
       .on('error', error => {
@@ -157,22 +163,26 @@ http2.createSecureServer({key: fs.readFileSync('private.key'), cert: fs.readFile
         }
         // multipart parse START
         let header_start = multipart.indexOf(first_boundary) + first_boundary.length
-        let header_end = multipart.indexOf('\r\n\r\n')
+        let header_end = multipart.indexOf(separator)
         let header = multipart.slice(header_start, header_end).toString()
         
         let field_name = header.match(/(?<name=").*?(?=")/g)[0]
         let file_name = header.match(/(?<filename=").*?(?=")/g)[0]
         
-        let start_data = header_end + header_end.length
+        let start_data = header_end + separator.length
         let end_data = multipart.indexOf(last_boundary)
-        let data = multipart.slice(header_end + header_end.length, end_data)
+        let data = multipart.slice(start_data, end_data)
         
         let data_of_form = {
           file: {
             [field_name]: data
           }
         }
+        // fs.writeFileSync('./public/media/${file_name}', data_of_form.file.field_name)
         // multipart parse END
+        response
+          .writeHead(200, {"Content-type": "text/html"})
+          .end(`<h2>file received</h2>`)
       })
   // multipart HTTP POST END
   }
