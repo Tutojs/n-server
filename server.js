@@ -1,7 +1,7 @@
 'use strict'
 // node version: 12.4.0 [latest]
 // to use ECMAscript modules without using .mjs:
-// create package.json [recommended in root] and add this field to top level: "type": "module"
+// create package.json in module folder [recommended in root for global] and add this field to top level: "type": "module"
 // package.json {"type" : "module"}
 // node --experimental-modules server.js
 
