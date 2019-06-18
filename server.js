@@ -399,7 +399,7 @@ http2.createSecureServer({key: fs.readFileSync('private.key'), cert: fs.readFile
             let { ext } = path.parse(filepath)
             let mediatype = mediatypes[ext.toLowerCase()] || 'application/octet-stream'
             response
-              .writeHead(200, {'content-type': mimetype})
+              .writeHead(200, {'content-type': mediatype})
               .end(data)
           })
           // serve request file for client END
