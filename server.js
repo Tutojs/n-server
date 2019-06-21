@@ -187,8 +187,10 @@ http2.createSecureServer({key: fs.readFileSync('private.key'), cert: fs.readFile
   // multipart HTTP POST END
   }
   else {
-    let { socket: { alpnProtocol } } = request.httpVersion === '2.0' ? request.stream.session : request
-    console.log(JSON.stringify({alpnProtocol, httpVersion: request.httpVersion}))
+    // detect http version
+    // let { socket: { alpnProtocol } } = request.httpVersion === '2.0' ? request.stream.session : request
+    // console.log(JSON.stringify({alpnProtocol, httpVersion: request.httpVersion}))
+    
     // static folder
     let staticfolder = 'public'
     let filepath = path.join(__dirname, staticfolder, request.url)
