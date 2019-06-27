@@ -1,7 +1,7 @@
 {
   "admin" : {
-    "firstname": "tuto",
-    "lastname" : "silent",
+    "firstname": "Tuto",
+    "lastname" : "Scorpion",
     "site": {
       "title": "Tutojs",
       "subtitle": "learn future",
@@ -12,23 +12,23 @@
     {
       "name" : "/start",
       "title": "Start",
-      "headline" : "Tutojs, start future now",
+      "headline" : "Tutojs, fresh ideas",
       "content" : "<p>Volutpat blandit aliquam etiam erat velit scelerisque in. Ut placerat orci nulla pellentesque dignissim enim sit amet venenatis. Nec ultrices dui sapien eget mi proin sed libero. Fames ac turpis egestas integer eget aliquet nibh. Volutpat sed cras ornare arcu dui. Blandit turpis cursus in hac habitasse platea. Pretium vulputate sapien nec sagittis aliquam malesuada bibendum. Enim lobortis scelerisque fermentum dui faucibus in ornare. Vestibulum lorem sed risus ultricies tristique. Tortor id aliquet lectus proin nibh. Feugiat scelerisque varius morbi enim nunc faucibus a. Laoreet id donec ultrices tincidunt arcu non sodales neque sodales. Eget est lorem ipsum dolor sit amet consectetur adipiscing. Habitant morbi tristique senectus et netus. Diam sollicitudin tempor id eu.</p>",
-      "author" : "Tuto Arya"
+      "author" : "Tuto Scorpion"
     },
     {
       "name" : "/about",
       "title" : "About",
-      "headline" : "who is Tuto?",
+      "headline" : "Tuto the Scorpion",
       "content" : "<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Nunc scelerisque viverra mauris in aliquam sem fringilla. Eget magna fermentum iaculis eu non. Id nibh tortor id aliquet lectus proin nibh nisl. Eu nisl nunc mi ipsum faucibus vitae aliquet nec ullamcorper. Sem et tortor consequat id. Non diam phasellus vestibulum lorem sed risus ultricies tristique nulla. Sit amet facilisis magna etiam tempor orci eu lobortis elementum. Arcu bibendum at varius vel pharetra vel turpis nunc. Sed enim ut sem viverra aliquet eget. Tincidunt lobortis feugiat vivamus at augue eget. Est pellentesque elit ullamcorper dignissim cras tincidunt lobortis feugiat vivamus. Morbi tristique senectus et netus et. Massa tincidunt nunc pulvinar sapien et ligula ullamcorper malesuada. In nibh mauris cursus mattis molestie a iaculis at erat.</p><p>Eget nullam non nisi est sit amet facilisis magna. Velit scelerisque in dictum non consectetur a erat nam. Maecenas volutpat blandit aliquam etiam erat velit scelerisque. Interdum velit laoreet id donec ultrices tincidunt arcu non. Augue ut lectus arcu bibendum at varius vel. Tristique senectus et netus et. Ultrices sagittis orci a scelerisque purus semper eget duis. Quisque sagittis purus sit amet. Quis ipsum suspendisse ultrices gravida dictum fusce ut. Amet facilisis magna etiam tempor orci eu lobortis elementum. Non nisi est sit amet facilisis magna etiam tempor. Tincidunt eget nullam non nisi. Amet dictum sit amet justo donec enim. Maecenas accumsan lacus vel facilisis volutpat est velit egestas dui. Tincidunt eget nullam non nisi est sit amet facilisis magna. Ut eu sem integer vitae justo eget magna fermentum iaculis.</p>",
-      "author" : "Tuto Arya"
+      "author" : "Tuto Scopion"
     },
     {
       "name" : "/contact",
       "title" : "Contact",
-      "headline" : "Send your question",
+      "headline" : "Have any Question?",
       "content" : "<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?</p>",
-      "author" : "Tuto Arya"
+      "author" : "Tuto Scorpion"
     }
   ]
 }
