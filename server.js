@@ -14,7 +14,6 @@ import path from 'path'
 // built-in modules END
 
 // json database START
-// example database
 import database from './database.json'
 // {
 // "admin": {}
@@ -35,17 +34,18 @@ import database from './database.json'
 // json database END
 
 // host START
-const hostname = '[::1]' // localhost in IPV6
-const port = {http: 80, https: 443} // default port of http and https
+  const hostname = '[::1]' // localhost in IPV6
+  const port = {http: 80, https: 443} // default port of http and https
 // host END
+  const domain = 'localhost'
 
 // __dirname and __filename don't exist in ECMAscript modules
 // import.meta is equivalence witch return url of module import.meta = {url: "url-of-module"}
 const __filename = url.fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-// media types list: https://www.iana.org/assignments/media-types/media-types.xhtml
-// media types
+// media types https://www.iana.org/assignments/media-types/media-types.xhtml
+// default mediatypes
 const mediatypes = {
   '.html': 'text/html',
   '.js': 'text/javascript',
@@ -71,11 +71,12 @@ const mediatypes = {
 // redirect all http request to https
 // http 301: Moved Permanently
 http.createServer((request, response) => {
+  console.log(request)
   response
     .writeHead(301, {'location': `https://${request.headers.host}${request.url}`})
     .end()
 })
-  .listen(port.http, hostname, () => {console.log('redirect to https')})
+  .listen(port.http, hostname, () => {console.log('redirect all http to https')})
 //http server END
 
 // http2 secure server START
@@ -89,7 +90,7 @@ http2.createSecureServer({key: fs.readFileSync('private.key'), cert: fs.readFile
   // key-1=value-1&key-2=value-2&...&key-n=value-n
   // {key-1: value-1, key-2, value-2, ..., key-n: value-n}
   if (request.method === 'POST' && request.headers['content-type'] === 'application/x-www-form-urlencoded') {
-    let body = Buffer.alloc(0)
+    let body = Buffer.from('')
     request
       .on('error', error => {
         response
@@ -115,6 +116,7 @@ http2.createSecureServer({key: fs.readFileSync('private.key'), cert: fs.readFile
         body = url.parse(`?${body.toString()}`, true).query
         // body = {key-1: value-1, key-2: value-2, ..., key-n, value-n}
         // do something with data
+        console.log(JSON.stringify(body))
         response
           .writeHead(200, {"Content-type": "text/html"})
           .end(`your info:\n<h2>${JSON.stringify(body)}</h2>`)
@@ -134,12 +136,11 @@ http2.createSecureServer({key: fs.readFileSync('private.key'), cert: fs.readFile
   // ${data}\r\n
   // --${boundary}--
   else if (request.method === 'POST' && request.headers['content-type'].match(/^.*?(?=; )/g)[0] === 'multipart/form-data') {
-    let boundary = request.headers['content-type'].match(/(?<=boundary=).*?$/g)[0]
-    let first_boundary = Buffer.from(`--${boundary}\r\n`)
-    // let middle_boundary = Buffer.from(`\r\n--${raw_boundary}\r\n`)
-    let last_boundary = Buffer.from(`\r\n--${boundary}--`)
-    let separator = Buffer.from('\r\n\r\n')
-    let multipart = Buffer.alloc(0)
+    let boundary = `--${request.headers['content-type'].match(/(?<=boundary=).*?$/g)[0]}`
+    let multipart = Buffer.from('\r\n')
+    console.log(boundary)
+    let partitions = []
+    let formdata = { fields: [], files: [] }
     request
       .on('error', error => {
         response
@@ -147,7 +148,9 @@ http2.createSecureServer({key: fs.readFileSync('private.key'), cert: fs.readFile
           .end(`<h2>${error.stack}</h2>`)
       })
       .on('data', chunk => {
+        // console.log(request) // node --experimental-modules server.js
         multipart = Buffer.concat([multipart, chunk])
+
         // maximum form size 32MB
         if (Buffer.byteLength(multipart) > 32*1024**2) {
           request
@@ -162,56 +165,83 @@ http2.createSecureServer({key: fs.readFileSync('private.key'), cert: fs.readFile
           return
         }
         // multipart parse START
-        let header_start = multipart.indexOf(first_boundary) + first_boundary.length
-        let header_end = multipart.indexOf(separator)
-        let header = multipart.slice(header_start, header_end).toString()
-        
-        let field_name = header.match(/(?<name=").*?(?=")/g)[0]
-        let file_name = header.match(/(?<filename=").*?(?=")/g)[0]
-        
-        let start_data = header_end + separator.length
-        let end_data = multipart.indexOf(last_boundary)
-        let data = multipart.slice(start_data, end_data)
-        
-        let data_of_form = {
-          file: {
-            [field_name]: data
-          }
+        multipart = Buffer.concat([multipart.slice(0, multipart.length - 2), Buffer.from('\r\n')])
+        console.log(multipart.toString())
+        let i = 0
+        let isboundary = true
+        let search = `\r\n${boundary}\r\n`
+
+        while (multipart.includes(search, i)) {
+          partitions.push(multipart.indexOf(search, i))
+          i = multipart.indexOf(search, i) + search.length
+
+          isboundary = isboundary ? false : true
+          search = `\r\n${isboundary ? boundary : ''}\r\n`
         }
-        // fs.writeFileSync('./public/media/${file_name}', data_of_form.file.field_name)
+
+        for (let i = 0 ; i < partitions.length - 1 ; i += 2) {
+            let hstart = partitions[i] + `\r\n${boundary}\r\n`.length
+            let hend = partitions[i+1]
+            let hbuffer = Buffer.concat([multipart.slice(hstart, hend)])
+            
+            let dstart = partitions[i+1] + '\r\n\r\n'.length
+            let dend = partitions[i+2]
+            let dbuffer = Buffer.concat([multipart.slice(dstart, dend)])
+            
+            let header = hbuffer.toString()
+            let fieldname = header.match(/(?<=name=").*?(?=")/g)
+            let filename = header.match(/(?<=filename=").*?(?=")/g)
+
+            if (filename === null) {
+              formdata.fields.push({
+                header: header,
+                data: dbuffer.toString(),
+                fieldname: fieldname[0],
+                bytesize: Buffer.byteLength(dbuffer)
+              })
+            }
+            else {
+              formdata.files.push({
+                header: header,
+                data: dbuffer,
+                bytesize: Buffer.byteLength(dbuffer),
+                fieldname: fieldname[0],
+                name: filename[0]
+              })
+            }
+        }
+        console.log(formdata.files, formdata.fields)
         // multipart parse END
+        // formdata.fields[i]
+        // formdata.files[i]
         response
           .writeHead(200, {"Content-type": "text/html"})
-          .end(`<h2>file received</h2>`)
+          .end(`<h2>file uploaded!</h2>`)
       })
   // multipart HTTP POST END
   }
   else {
-    // detect http version
-    // let { socket: { alpnProtocol } } = request.httpVersion === '2.0' ? request.stream.session : request
-    // console.log(JSON.stringify({alpnProtocol, httpVersion: request.httpVersion}))
-    
+    let { socket: { alpnProtocol } } = request.httpVersion === '2.0' ? request.stream.session : request
+    console.log(JSON.stringify({alpnProtocol, httpVersion: request.httpVersion}))
     // static folder
     let staticfolder = 'public'
     let filepath = path.join(__dirname, staticfolder, request.url)
     let urlpath = path.normalize(request.url)
-    request.url = urlpath === path.sep? urlpath: urlpath.replace(/[/\\]?$/, '')
+    request.url = urlpath === path.sep ? urlpath : urlpath.replace(/[/\\]?$/, '')
 
     fs.stat(filepath, (error, stats) => {
       if (error || request.url === path.sep) {
-        if (error) {
-          if (error.code !== 'ENOENT') {
-            response
-              .writeHead(500, {'content-type': 'text/html'})
-              .end(`<p>Sorry, check with the site admin for error: <br><b>${error.code}<b></p>`)
-            return
-          }
+        if (error && error.code !== 'ENOENT') {
+          response
+            .writeHead(500, {'content-type': 'text/html'})
+            .end(`<p>Sorry, check with the site admin for error: <br><b>${error.code}<b></p>`)
+          return
         }
         let { pathname } = url.parse(request.url)
         let siteinfo = {...database.admin.site}
         let article = {...database.post.find(post => post.name === pathname)}
         let {
-          name = '/',
+          name = '/404',
           title = '404 PAGE',
           headline= 'Return to Home page',
           content = '<h1>PAGE NOT FOUND!</h1><p>HTTP 404</p>',
@@ -229,25 +259,28 @@ http2.createSecureServer({key: fs.readFileSync('private.key'), cert: fs.readFile
               href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
               integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
               crossorigin="anonymous">
-            <title>${title}</title>
+            <title>${pathname === '/' ? 'Home' : title}</title>
           </head>
           <body>
             <header class="text-center">
               <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
-                <a class="navbar-brand" href="https://localhost">${siteinfo.title}-${siteinfo.subtitle}</a>
+                <a class="navbar-brand" href="https://localhost">
+                <img src="${siteinfo.logo}" width="30" height="30" class="d-inline-block align-top" alt="" >
+                ${siteinfo.title}
+                </a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
                   <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="collapsibleNavbar">
                   <ul class="navbar-nav">
                     <li class="nav-item">
-                      <a class="nav-link" href="https://${hostname}">Home</a>
+                      <a class="nav-link" href="https://${domain}">Home</a>
                     </li>
                     <li class="nav-item">
-                      <a class="nav-link" href="https://${hostname}/about">About</a>
+                      <a class="nav-link" href="https://${domain}/about">About</a>
                     </li>
                     <li class="nav-item">
-                      <a class="nav-link" href="https://${hostname}/contact">Contact</a>
+                      <a class="nav-link" href="https://${domain}/contact">Contact</a>
                     </li>    
                   </ul>
                 </div>  
@@ -261,24 +294,24 @@ http2.createSecureServer({key: fs.readFileSync('private.key'), cert: fs.readFile
               </ol>
               <div class="carousel-inner">
                 <div class="carousel-item active">
-                  <img class="d-block w-100 bg-primary" style="height:400px" src="" alt="First slide">
-                  <div class="carousel-caption d-none d-md-block" style="background-color: rgba(52,58,64,0.25)">
+                <svg class="d-block w-100 bg-danger" height="400" role="img">First slide</svg>
+                <div class="carousel-caption" style="background-color: rgba(52,58,64,0.25)">
                     <h5>Article 1</h5>
-                    <p>article 1, first caption</p>
+                    <p>Article 1, caption</p>
                   </div>
                 </div>
                 <div class="carousel-item">
-                  <img class="d-block w-100 bg-danger" style="height:400px" src="" alt="Second slide">
-                  <div class="carousel-caption d-none d-md-block" style="background-color: rgba(52,58,64,0.25)">
+                <svg class="d-block w-100 bg-primary" height="400" role="img">Second slide</svg>
+                <div class="carousel-caption" style="background-color: rgba(52,58,64,0.25)">
                     <h5>Article 2</h5>
-                    <p>article 2, second caption</p>
+                    <p>Article 2, caption</p>
                   </div>
                 </div>
                 <div class="carousel-item">
-                  <img class="d-block w-100 bg-warning" style="height:400px" src="" alt="Third slide">
-                  <div class="carousel-caption d-none d-md-block" style="background-color: rgba(52,58,64,0.25)">
+                  <svg class="d-block w-100 bg-warning" height="400" role="img">Third slide</svg>
+                  <div class="carousel-caption" style="background-color: rgba(52,58,64,0.25)">
                     <h5>Article 3</h5>
-                    <p>article 3, third caption</p>
+                    <p>Article 3, caption</p>
                   </div>
                 </div>
               </div>
@@ -294,78 +327,116 @@ http2.createSecureServer({key: fs.readFileSync('private.key'), cert: fs.readFile
             <div class="container" style="margin-top:30px">
               <div class="row">
                 <div class="col-sm-4">
-                  <h2>About Me</h2>
-                  <h5>Photo of me:</h5>
-                  <div class="fakeimg">Fake Image</div>
+                  <h2>${siteinfo.title}</h2>
+                  <h5>${siteinfo.subtitle}</h5>
+                  <img class="w-100" src="${siteinfo.logo}">
                   <p>Some text about me in culpa qui officia deserunt mollit anim..</p>
+
                   <h3>Some Links</h3>
                   <p>Lorem ipsum dolor sit ame.</p>
                   <ul class="nav nav-pills flex-column">
                     <li class="nav-item">
-                      <a class="nav-link active" href="https://${hostname}">Home</a>
+                      <a class="nav-link ${pathname === '/' ? 'active' : ''}" href="https://${domain}">Home</a>
                     </li>
                     <li class="nav-item">
-                      <a class="nav-link" href="https://${hostname}/about">About</a>
+                      <a class="nav-link ${pathname === '/about' ? 'active' : ''}" href="https://${domain}/about">About</a>
                     </li>
                     <li class="nav-item">
-                      <a class="nav-link" href="https://${hostname}">Link</a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link disabled" href="#">Disabled</a>
+                      <a class="nav-link ${pathname === '/contact' ? 'active' : ''}" href="https://${domain}/contact">Contact</a>
                     </li>
                   </ul>
                   <hr class="d-sm-none">
                 </div>
                 <div class="col-sm-8">
-                  <form action="/" method="POST" enctype="multipart/form-data"><!--enctype="application/x-www-form-urlencoded"-->
-                    <input name="name">
-                    <input name="age">
-                    <input type="file" name="profile" multiple>
-                    <button type="submit">Send</button>
-                  </form>
-                  <h2><a href="https://${hostname}${name}">${headline}</a></h2>
-                  <h5>Title description, Jun 11, 2019</h5>
-                  <div class="fakeimg">Fake Image</div>
-                  ${content}
-                  ${author}
-                  <br>
+                  ${
+                    pathname === '/' ?
+                    database.post
+                      .slice(0, 5)
+                      .map(element =>
+                      `<div class="card">
+                        <div class="card-header">
+                          <h2>
+                            <a href="https://${domain}${element.name}">${element.headline}</a>
+                          </h2>
+                          <span class="text.secondary">permalink <a href="https://${domain}${element.name}">#</a></span>
+                          <h5>${new Date().getFullYear()}-${new Date().getMonth() + 1}-${(Math.random()*31).toFixed(0)}</h5>
+                        </div>
+                        <div class="card-body">
+                          ${element.content}
+                        </div>
+                        <div class="card-footer">
+                          <span>Author: ${element.author}</span>
+                        </div>
+                      </div>`)
+                      .join('<br>')
+                    :
+                    `<div class="card">
+                      <div class="card-header">
+                        <h2>${headline}</h2>
+                        <span class="text.secondary">permalink <a href="https://${domain}${name}">#</a></span>
+                        <h5>${new Date().getFullYear()}-${new Date().getMonth() + 1}-${(Math.random()*30).toFixed(0)}</h5>
+                      </div>
+                      <div class="card-body"
+                      ${content}
+                      </div>
+                      <div class="card-footer">
+                        <span>Author: ${author}</span>
+                      </div>
+                    </div>
+                    <br>`
+                  }
                 </div>
               </div>
             </div>
-            <footer class="footer-area">
-              <div class="container">
-                <div class="row justify-content-between">
-                  <div class="col-sm-6 col-md-6 col-xl-4">
-                    <h4>About</h4>
-                    <p>But when shot real her. Chamber her one visite removal six
-                        sending himself boys scot exquisite existend an </p>
-                    <p>But when shot real her hamber her</p>
-                  </div>
-                  <div class="col-sm-6 col-md-6 col-xl-4">
-                    <h4>TUTOJS</h4>
-                    <p>"Programming is like a self-service resturant, you can use everything but it's better to cook your meal" Tuto Arya</p>
-                  </div>
-                  <div class="col-sm-12 col-md-8 col-xl-3">
-                    <h4>Latest Posts</h4>
-                    <p>${database.post == undefined? 'No Post':
+            <footer class="container" style="margin-top:30px">
+              <div class="row justify-content-between">
+                <div class="col-sm-6 col-md-6 col-xl-4">
+                  <h4>Login</h4>
+                  <form action="/" method="POST" enctype="multipart/form-data">
+                    <div class="form-group">
+                      <label for="exampleInputEmail1">Email address</label>
+                      <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email" name="email">
+                      <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+                    </div>
+                    <div class="form-group"><!--node --experimental-modules server.js-->
+                      <label for="exampleInputPassword1">Password</label>
+                      <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password" name="password">
+                    </div>
+                    <div class="form-group form-check">
+                      <input type="checkbox" class="form-check-input" id="exampleCheck1" name="checkbox">
+                      <label class="form-check-label" for="exampleCheck1">Check me out</label>
+                    </div>
+                    <div class="input-group mb-3">
+                      <div class="custom-file">
+                        <input type="file" class="custom-file-input" id="fileupload" name="profile">
+                        <label class="custom-file-label" for="fileupload">Choose file</label>
+                      </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                  </form>
+                </div>
+                <div class="col-sm-6 col-md-6 col-xl-4">
+                  <h4>TUTOJS</h4>
+                  <blockquote class="blockquote">
+                    <p class="mb-0">Programming is like a self-service resturant, you can use everything but it's better to cook your meal.</p>
+                    <footer class="blockquote-footer">Tuto Arya, <cite title="Scripter">The Scorpion</cite></footer>
+                  </blockquote>
+                </div>
+                <div class="col-sm-12 col-md-8 col-xl-3">
+                  <h4>Latest Posts</h4>
+                  <p>${
+                    database.post == undefined ?
+                    'No Post'
+                    :
                     database.post
                       .slice(0, 5)
-                      .map(el => `<a href="https://${hostname}${el.name}">${el.headline}</a>`)
-                      .join('<br>')}
-                    </p>
-                  </div>
+                      .map(element => `<a href="https://${domain}${element.name}">${element.headline}</a> <span class="badge badge-pill badge-primary">${(Math.random()*100).toFixed(0)}</span>`)
+                      .join('<br>')
+                  }</p>
                 </div>
               </div>
               <div class="container-fluid">
-                <div class="row">
-                  <div class="col-lg-12">
-                    <div class="row">
-                      <div class="col-lg-12">
-                        <p class="text-center">Copyrightless</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <p class="text-center">Tutojs ${new Date().getFullYear()} no right reserved ©less</p>
               </div>
             </footer>
             <script
@@ -415,7 +486,7 @@ http2.createSecureServer({key: fs.readFileSync('private.key'), cert: fs.readFile
                 .end(`<h2>${error.stack}</h2><p>check with site admin</p>`)
               return
             }
-            let list = files.map(el => `<li><a href="https://${hostname}${request.url}/${el.name}">${el.name}</a></li>`)
+            let list = files.map(element => `<li><a href="https://${domain}${request.url}/${element.name}">${element.name}</a></li>`)
             response
               .writeHead(200, {'content-type': 'text/html'})
               .end(`<ul>${list.join('')}</ul>`)
@@ -426,5 +497,5 @@ http2.createSecureServer({key: fs.readFileSync('private.key'), cert: fs.readFile
     })
   }
 })
-  .listen(port.https, hostname, () => {console.log(`server running on https://${hostname}:${port.https}`)})
+  .listen(port.https, hostname, () => {console.log(`server running on https://${domain}:${port.https}`)})
 // http2 secure server END
