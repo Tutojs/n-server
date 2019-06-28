@@ -15,29 +15,13 @@ import path from 'path'
 
 // json database START
 import database from './database.json'
-// {
-// "admin": {}
-// 
-// post: [
-//   {
-//      "name" : "/",
-//      "title": "Home",
-//      "headline" : "Tutojs",
-//      "content" : "<p>Tutojs is pure Nodejs</p>",
-//      "author" : "Tuto"
-//    },
-//   {...},
-//   {...},
-//   {...},
-// ]
-// }
 // json database END
 
 // host START
-  const hostname = '[::1]' // localhost in IPV6
-  const port = {http: 80, https: 443} // default port of http and https
+const hostname = '[::1]' // localhost in IPV6
+const port = {http: 80, https: 443} // default port of http and https
 // host END
-  const domain = 'localhost'
+const domain = 'localhost'
 
 // __dirname and __filename don't exist in ECMAscript modules
 // import.meta is equivalence witch return url of module import.meta = {url: "url-of-module"}
