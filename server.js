@@ -1,8 +1,5 @@
 'use strict'
 // node version: 12.5.0 [latest]
-// to use ECMAscript modules without using .mjs:
-// create package.json in module folder [recommended in root for global] and add this field to top level: "type": "module"
-// package.json {"type" : "module"}
 // node --experimental-modules server.js
 
 // built-in modules START
@@ -29,7 +26,6 @@ const __filename = url.fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 // media types https://www.iana.org/assignments/media-types/media-types.xhtml
-// default mediatypes
 const mediatypes = {
   '.html': 'text/html',
   '.js': 'text/javascript',
@@ -64,7 +60,8 @@ http.createServer((request, response) => {
 //http server END
 
 // http2 secure server START
-// to create key and cert files for self-signed ssl certificate use openssl, or use https://www.ssl.com/online-csr-and-key-generator
+// to create key and cert files for self-signed ssl certificate use openssl
+// or use https://www.ssl.com/online-csr-and-key-generator
 // set "allowHTTP1: true" to support both http 1 and 2 clients
 http2.createSecureServer({key: fs.readFileSync('private.key'), cert: fs.readFileSync('certificate.cert'), allowHTTP1: true}, (request, response) => {
   console.log(JSON.stringify({method: request.method, url: request.url}))
@@ -111,18 +108,17 @@ http2.createSecureServer({key: fs.readFileSync('private.key'), cert: fs.readFile
   // multipart HTTP POST START
   // multipart structure:
   // --${boundary}\r\n
-  // ${headers}\r\n
+  // ${headers-1}\r\n
   // \r\n
-  // ${data}\r\n
+  // ${data-1}\r\n
   // --${boundary}\r\n
-  // ${headers}\r\n
+  // ${headers-2}\r\n
   // \r\n
-  // ${data}\r\n
+  // ${data-2}\r\n
   // --${boundary}--
   else if (request.method === 'POST' && request.headers['content-type'].match(/^.*?(?=; )/g)[0] === 'multipart/form-data') {
     let boundary = `--${request.headers['content-type'].match(/(?<=boundary=).*?$/g)[0]}`
     let multipart = Buffer.from('\r\n')
-    console.log(boundary)
     let partitions = []
     let formdata = { fields: [], files: [] }
     request
@@ -150,7 +146,6 @@ http2.createSecureServer({key: fs.readFileSync('private.key'), cert: fs.readFile
         }
         // multipart parse START
         multipart = Buffer.concat([multipart.slice(0, multipart.length - 2), Buffer.from('\r\n')])
-        console.log(multipart.toString())
         let i = 0
         let isboundary = true
         let search = `\r\n${boundary}\r\n`
@@ -194,7 +189,6 @@ http2.createSecureServer({key: fs.readFileSync('private.key'), cert: fs.readFile
               })
             }
         }
-        console.log(formdata.files, formdata.fields)
         // multipart parse END
         // formdata.fields[i]
         // formdata.files[i]
